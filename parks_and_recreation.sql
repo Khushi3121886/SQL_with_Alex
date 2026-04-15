@@ -74,6 +74,52 @@ VALUES
 ('Library'),
 ('Finance');
 
+SELECT *
+FROM employee_demographics;
+
+SELECT first_name, last_name, birth_date
+FROM employee_demographics;
+
+SELECT * 
+FROM employee_demographics
+WHERE 
+birth_date > "1985-01-01"
+AND gender = "Female";
+
+-- string funtions
+SELECT *
+FROM
+employee_demographics;
+
+SELECT LENGTH('shreyas');
+SELECT first_name, LENGTH(first_name)
+FROM employee_demographics
+ORDER BY 2;
+
+-- TRIM
+SELECT TRIM("    sky      ");
+SELECT RTRIM("    sky      ");
+SELECT LTRIM("    sky      ");
+
+SELECT first_name,
+LEFT(first_name, 4),
+RIGHT(first_name, 4),
+SUBSTRING(birth_date, 6, 2) as birth_month
+FROM
+employee_demographics;
+
+SELECT REPLACE(first_name, 'a', 'z')
+FROM
+employee_demographics;
+
+SELECT LOCATE("x", "Alex");
+
+SELECT first_name, LOCATE("an", first_name)
+FROM
+employee_demographics;
+
+
+
 
 
 
