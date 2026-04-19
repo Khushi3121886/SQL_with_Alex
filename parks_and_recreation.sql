@@ -118,16 +118,131 @@ SELECT first_name, LOCATE("an", first_name)
 FROM
 employee_demographics;
 
+-- day 3
+use parks_and_recreation;
+SELECT first_name, last_name,
+CONCAT(first_name, " ", last_name) as full_name
+from employee_demographics;
 
+-- case statements
+-- pay increase and bonus
+-- < 50000 = 5%
+-- > 50000 = 7%
+-- finance = 10% bonus
+select * from employee_salary;
+SELECT employee_id, first_name, last_name, salary,
+CASE 
+    WHEN salary < 50000 THEN salary + (0.5 * salary)
+    WHEN salary > 50000 THEN salary * 1.07 
+END AS new_salary,
+CASE
+    WHEN dept_id = 6 THEN salary * 0.10
+END AS bonus
+FROM employee_salary;
 
+-- subquery
+SELECT * FROM employee_demographics
+WHERE employee_id IN(SELECT employee_id
+					 FROM employee_salary
+                     WHERE dept_id = 1);
 
+SELECT first_name, salary,
+(SELECT AVG(salary)
+FROM employee_salary)
+FROM employee_salary;
 
+-- SUBQUERY IN FROM 
+SELECT AVG(max_age) FROM
+(SELECT gender, AVG(age), MAX(age) as max_age, COUNT(age)
+FROM employee_demographics
+GROUP BY gender) AS agg_table  ;
 
+-- day 3
+-- window functions
+SELECT gender, avg(salary)
+FROM employee_demographics as dem
+Join employee_salary as sal
+ON dem.employee_id = sal.employee_id
+group by gender;  
 
+-- rolling total
+SELECT gender, salary, dem.first_name, dem.last_name,
+sum(salary) over(partition by gender order by dem.employee_id) as rolling_total
+from employee_demographics dem
+JOIN employee_salary sal  
+on dem.employee_id = sal.employee_id;      
 
+-- row number, rank, dense rank
+SELECT dem.employee_id, dem.first_name, dem.last_name, gender,salary,
+ROW_NUMBER() OVER(PARTITION BY gender ORDER BY salary DESC) as row_num,
+RANK() OVER(PARTITION BY gender ORDER BY salary DESC) as rank_num,
+DENSE_RANK() OVER(PARTITION BY gender ORDER BY salary DESC) as dense_rank_num
+FROM employee_demographics dem
+JOIN employee_salary sal
+ON dem.employee_id = sal.employee_id;
+-- CTE's
+WITH cte_example as
+(
+SELECT gender, max(salary) AS max_sal, min(salary) as min_sal, avg(salary) as avg_sal
+from employee_demographics dem
+JOIN employee_salary sal
+ON dem.employee_id = sal.employee_id
+group by gender
+)
+SELECT AVG(avg_sal)
+FROM cte_example;
 
+SELECT AVG(avg_sal) from(
+SELECT gender, max(salary) AS max_sal, min(salary) as min_sal, avg(salary) as avg_sal
+from employee_demographics dem
+JOIN employee_salary sal
+ON dem.employee_id = sal.employee_id
+group by gender
+) as subquery_ex;
+-- complex cte
+with cte_example as
+(
+select employee_id, birth_date, gender
+from employee_demographics
+where birth_date > "1985-01-01"
+),
+cte_example2 as
+(
+select employee_id, salary
+from employee_salary
+where salary > 50000
+)
+select * 
+from cte_example
+join cte_example2
+on cte_example.employee_id = cte_example2.employee_id;
 
+-- temporary table
+CREATE TEMPORARY TABLE Temp_table
+(first_name varchar(50),
+last_name varchar(50),
+fav_movie varchar(100)
+);
 
+select * from temp_table;
+INSERT INTO temp_table
+values("Khushi", "Srinivas", "Shreyas");
 
+CREATE TEMPORARY TABLE salary_over_50k
+SELECT * 
+FROM employee_salary
+where salary >= 50000;
 
+select * from salary_over_50k;
+
+-- stored procedure
+DELIMITER $$
+create procedure employee_salary_new(SP_employee_id INT)
+BEGIN
+select salary
+from employee_salary
+where employee_id = SP_employee_id;
+END $$
+DELIMITER ;
+CALL employee_salary_new(1)
 
