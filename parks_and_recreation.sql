@@ -246,3 +246,35 @@ END $$
 DELIMITER ;
 CALL employee_salary_new(1)
 
+-- triggers and events
+DELIMITER $$
+CREATE TRIGGER employee_insert
+AFTER INSERT ON employee_salary
+FOR EACH ROW
+BEGIN
+INSERT INTO employee_demographics(employee_id, first_name, last_name)
+VALUES(NEW. employee_id, NEW.first_name, NEW.last_name);
+END $$
+DELIMITER ;
+
+INSERT INTO employee_salary(employee_id, first_name, last_name, occupation, salary, dept_id)
+VALUES(13, "Shreyas", "Gangadhar", "software Engineer Copart", 1000000, null);
+
+SELECT * FROM employee_salary;
+SELECT * FROM employee_demographics;
+
+-- events
+DELIMITER $$
+CREATE EVENT delete_retires
+ON SCHEDULE EVERY 30 SECOND
+DO 
+BEGIN
+DELETE FROM employee_demographics
+WHERE age>=60;
+END $$
+DELIMITER ;
+
+SELECT * FROM employee_demographics;
+
+SHOW VARIABLES LIKE "EVENT%";
+
